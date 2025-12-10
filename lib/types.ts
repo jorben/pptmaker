@@ -5,6 +5,9 @@ declare global {
       hasSelectedApiKey: () => Promise<boolean>;
       openSelectKey: () => Promise<void>;
     };
+    mammoth?: {
+      extractRawText: (options: { arrayBuffer: ArrayBuffer }) => Promise<{ value: string; messages: any[] }>;
+    };
   }
 }
 
@@ -18,9 +21,9 @@ export enum AppStep {
 }
 
 export enum SlideStyle {
-  MINIMAL = 'MINIMAL', // To-the-point, high impact
-  DETAILED = 'DETAILED', // Educational, text-heavy
-  CUSTOM = 'CUSTOM' // User defined
+  MINIMAL = 'MINIMAL',
+  DETAILED = 'DETAILED',
+  CUSTOM = 'CUSTOM'
 }
 
 export interface InputSource {
@@ -36,7 +39,7 @@ export interface PresentationConfig {
   language: 'Chinese' | 'English';
   style: SlideStyle;
   customStyleDescription?: string;
-  additionalPrompt?: string; // Supplementary requirements from user
+  additionalPrompt?: string;
   contentModel: string;
   imageModel: string;
 }
@@ -44,7 +47,7 @@ export interface PresentationConfig {
 export interface SlideContent {
   title: string;
   bulletPoints: string[];
-  visualDescription: string; // The instruction for the image model
+  visualDescription: string;
 }
 
 export interface Slide {
@@ -53,10 +56,42 @@ export interface Slide {
   content: SlideContent;
   status: 'pending' | 'generating' | 'completed' | 'failed';
   imageUrl?: string;
-  promptUsed?: string; // The actual prompt sent to image model
+  promptUsed?: string;
 }
 
 export interface Presentation {
   title: string;
   slides: Slide[];
 }
+
+// Gemini API types
+export interface GeminiRequest {
+  action: 'plan-presentation' | 'generate-image' | 'optimize-content';
+  payload: {
+    prompt?: string;
+    document?: string;
+    model?: string;
+    options?: Record<string, unknown>;
+  };
+}
+
+export interface GeminiResponse {
+  success: boolean;
+  data?: {
+    content: string;
+    metadata?: Record<string, unknown>;
+  };
+  error?: string;
+}
+
+export interface DocumentContent {
+  text: string;
+  html?: string;
+}
+
+export interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: number;
+}
+
