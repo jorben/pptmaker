@@ -1,0 +1,5 @@
+{
+  "name": "PPTMaker AI",
+  "description": "An AI-powered presentation generator that transforms text and documents into professional slides using Gemini 3 Pro.",
+  "requestFramePermissions": []
+}
