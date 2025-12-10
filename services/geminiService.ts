@@ -1,17 +1,33 @@
-import { GoogleGenAI, Type, Schema, GenerateContentResponse } from "@google/genai";
-import { Slide, SlideContent, PresentationConfig, SlideStyle, InputSource } from "../types";
+import {
+  GoogleGenAI,
+  Type,
+  Schema,
+  GenerateContentResponse,
+} from "@google/genai";
+import {
+  Slide,
+  SlideContent,
+  PresentationConfig,
+  SlideStyle,
+  InputSource,
+} from "../types";
 
 // Helper to get client with current key
 const getClient = () => {
-  const apiKey = process.env.API_KEY;
+  // Priority: 1. Runtime key (manual input) 2. Environment variable
+  const apiKey = (window as any).__GEMINI_API_KEY__ || process.env.GEMINI_API_KEY || process.env.API_KEY;
   if (!apiKey) {
-    throw new Error("API Key not found");
+    throw new Error("API Key not found. Please provide a valid Gemini API key.");
   }
   return new GoogleGenAI({ apiKey });
 };
 
 // Retry helper for robustness against timeouts (499) and server busy states
-const retry = async <T>(fn: () => Promise<T>, retries = 2, delay = 2000): Promise<T> => {
+const retry = async <T>(
+  fn: () => Promise<T>,
+  retries = 2,
+  delay = 2000
+): Promise<T> => {
   try {
     return await fn();
   } catch (error: any) {
@@ -20,17 +36,21 @@ const retry = async <T>(fn: () => Promise<T>, retries = 2, delay = 2000): Promis
       throw error;
     }
 
-    const isRetryable = 
-      error.status === 499 || 
-      error.status === 503 || 
-      error.status === 504 || 
-      error.message?.includes('cancelled') ||
-      error.message?.includes('timeout') ||
-      error.message?.includes('fetch failed');
-      
+    const isRetryable =
+      error.status === 499 ||
+      error.status === 503 ||
+      error.status === 504 ||
+      error.message?.includes("cancelled") ||
+      error.message?.includes("timeout") ||
+      error.message?.includes("fetch failed");
+
     if (retries > 0 && isRetryable) {
-      console.warn(`Operation failed with ${error.status || error.message}. Retrying... (${retries} attempts left)`);
-      await new Promise(resolve => setTimeout(resolve, delay));
+      console.warn(
+        `Operation failed with ${
+          error.status || error.message
+        }. Retrying... (${retries} attempts left)`
+      );
+      await new Promise((resolve) => setTimeout(resolve, delay));
       return retry(fn, retries - 1, delay * 2);
     }
     throw error;
@@ -43,14 +63,19 @@ export const planPresentation = async (
   config: PresentationConfig
 ): Promise<{ title: string; slides: SlideContent[] }> => {
   const ai = getClient();
-  
-  const stylePrompt = config.style === SlideStyle.CUSTOM 
-    ? `Custom Style: ${config.customStyleDescription}`
-    : `Style: ${config.style === SlideStyle.MINIMAL ? 'Minimalist, high impact, few words' : 'Detailed, educational, comprehensive'}`;
 
-  const additionalContext = config.additionalPrompt 
-    ? `\nImportant Additional Instructions from User: ${config.additionalPrompt}` 
-    : '';
+  const stylePrompt =
+    config.style === SlideStyle.CUSTOM
+      ? `Custom Style: ${config.customStyleDescription}`
+      : `Style: ${
+          config.style === SlideStyle.MINIMAL
+            ? "Minimalist, high impact, few words"
+            : "Detailed, educational, comprehensive"
+        }`;
+
+  const additionalContext = config.additionalPrompt
+    ? `\nImportant Additional Instructions from User: ${config.additionalPrompt}`
+    : "";
 
   const systemInstruction = `
     You are an expert presentation designer. 
@@ -91,42 +116,44 @@ export const planPresentation = async (
 
   let contentParts: any[] = [];
 
-  if (input.type === 'file' && input.fileData && input.mimeType) {
+  if (input.type === "file" && input.fileData && input.mimeType) {
     // Multimodal input (PDF)
     contentParts = [
       {
         inlineData: {
           mimeType: input.mimeType,
-          data: input.fileData
-        }
+          data: input.fileData,
+        },
       },
       {
-        text: "Analyze this document and generate the presentation structure based on the system instructions."
-      }
+        text: "Analyze this document and generate the presentation structure based on the system instructions.",
+      },
     ];
   } else {
     // Text input
     const textContent = input.textContent || "";
     contentParts = [
       {
-        text: `Input Text:\n${textContent.substring(0, 30000)}` // Truncate for safety
-      }
+        text: `Input Text:\n${textContent.substring(0, 30000)}`, // Truncate for safety
+      },
     ];
   }
 
   // Wrapped in retry to handle 499/Timeouts
-  const response = await retry(() => ai.models.generateContent({
-    model: config.contentModel || "gemini-2.5-flash",
-    contents: {
-      role: "user",
-      parts: contentParts
-    },
-    config: {
-      systemInstruction: systemInstruction,
-      responseMimeType: "application/json",
-      responseSchema: responseSchema,
-    },
-  }));
+  const response = await retry(() =>
+    ai.models.generateContent({
+      model: config.contentModel || "gemini-2.5-flash",
+      contents: {
+        role: "user",
+        parts: contentParts,
+      },
+      config: {
+        systemInstruction: systemInstruction,
+        responseMimeType: "application/json",
+        responseSchema: responseSchema,
+      },
+    })
+  );
 
   if (!response.text) throw new Error("No response from AI");
   return JSON.parse(response.text);
@@ -140,15 +167,16 @@ export const generateSlideImage = async (
 ): Promise<string> => {
   const ai = getClient();
 
-  const styleContext = config.style === SlideStyle.CUSTOM 
-    ? config.customStyleDescription 
-    : config.style === SlideStyle.MINIMAL 
+  const styleContext =
+    config.style === SlideStyle.CUSTOM
+      ? config.customStyleDescription
+      : config.style === SlideStyle.MINIMAL
       ? "Modern, clean, lots of whitespace, corporate memphis or swiss style"
       : "Professional, structured, grid layout, academic or technical style";
 
-  const additionalContext = config.additionalPrompt 
-    ? `\nAdditional Style Requirements: ${config.additionalPrompt}` 
-    : '';
+  const additionalContext = config.additionalPrompt
+    ? `\nAdditional Style Requirements: ${config.additionalPrompt}`
+    : "";
 
   // Constructing a prompt for the Image generation model
   const prompt = `
@@ -174,22 +202,24 @@ export const generateSlideImage = async (
   const imageConfig: any = {
     aspectRatio: "16:9",
   };
-  
+
   // Only add imageSize for Pro models, as Flash models do not support it
-  if (modelName.includes('pro')) {
-     imageConfig.imageSize = "2K";
+  if (modelName.includes("pro")) {
+    imageConfig.imageSize = "2K";
   }
 
   // Wrapped in retry
-  const response = await retry(() => ai.models.generateContent({
-    model: modelName,
-    contents: {
-      parts: [{ text: prompt }]
-    },
-    config: {
-      imageConfig: imageConfig
-    }
-  }));
+  const response = await retry(() =>
+    ai.models.generateContent({
+      model: modelName,
+      contents: {
+        parts: [{ text: prompt }],
+      },
+      config: {
+        imageConfig: imageConfig,
+      },
+    })
+  );
 
   // Extract image
   for (const part of response.candidates?.[0]?.content?.parts || []) {

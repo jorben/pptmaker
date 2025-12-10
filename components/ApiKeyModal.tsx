@@ -1,18 +1,33 @@
 import React, { useEffect, useState } from 'react';
 import { Key } from 'lucide-react';
+// Import types to get Window.aistudio declaration
+import '../types';
 
 interface Props {
   onKeySelected: () => void;
 }
 
+// Check if running in AI Studio environment
+const isAIStudio = typeof window !== 'undefined' && 'aistudio' in window;
+
 export const ApiKeyModal: React.FC<Props> = ({ onKeySelected }) => {
   const [checking, setChecking] = useState(true);
+  const [manualKey, setManualKey] = useState('');
+  const [error, setError] = useState('');
 
   const checkKey = async () => {
     setChecking(true);
     try {
-      if (window.aistudio && await window.aistudio.hasSelectedApiKey()) {
+      // Check if API key is already configured via environment variable
+      if (process.env.API_KEY || process.env.GEMINI_API_KEY) {
         onKeySelected();
+        return;
+      }
+
+      // AI Studio environment
+      if (isAIStudio && window.aistudio && await window.aistudio.hasSelectedApiKey()) {
+        onKeySelected();
+        return;
       }
     } catch (e) {
       console.error(e);
@@ -28,17 +43,25 @@ export const ApiKeyModal: React.FC<Props> = ({ onKeySelected }) => {
 
   const handleSelectKey = async () => {
     try {
-      if (window.aistudio) {
+      if (isAIStudio && window.aistudio) {
         await window.aistudio.openSelectKey();
-        // As per documentation/guidelines, assume success immediately after opening the dialog
-        // to mitigate race conditions where hasSelectedApiKey might lag.
         onKeySelected();
       }
     } catch (e) {
       console.error("Error selecting key", e);
-      // Fallback check
       checkKey();
     }
+  };
+
+  const handleManualKeySubmit = () => {
+    if (!manualKey.trim()) {
+      setError('Please enter an API key');
+      return;
+    }
+    // Store the key in a way that geminiService can access it
+    // We'll use a global variable since env vars can't be set at runtime
+    (window as any).__GEMINI_API_KEY__ = manualKey.trim();
+    onKeySelected();
   };
 
   if (checking) return null;
@@ -51,17 +74,50 @@ export const ApiKeyModal: React.FC<Props> = ({ onKeySelected }) => {
         </div>
         <h2 className="text-2xl font-bold text-gray-900 mb-2">API Key Required</h2>
         <p className="text-gray-600 mb-6">
-          To generate high-quality slides with Gemini 3 Pro Image, please select a paid API key.
+          To generate high-quality slides with Gemini, please provide your API key.
         </p>
         
-        <button
-          onClick={handleSelectKey}
-          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
-        >
-          Select API Key
-        </button>
+        {isAIStudio ? (
+          // AI Studio environment - use their key selector
+          <button
+            onClick={handleSelectKey}
+            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
+          >
+            Select API Key
+          </button>
+        ) : (
+          // Local environment - manual input
+          <div className="space-y-4">
+            <div className="text-left">
+              <input
+                type="password"
+                value={manualKey}
+                onChange={(e) => {
+                  setManualKey(e.target.value);
+                  setError('');
+                }}
+                placeholder="Enter your Gemini API Key"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              />
+              {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+            </div>
+            <button
+              onClick={handleManualKeySubmit}
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+            >
+              Continue
+            </button>
+            <p className="text-xs text-gray-500">
+              Tip: You can also set <code className="bg-gray-100 px-1 rounded">GEMINI_API_KEY</code> in <code className="bg-gray-100 px-1 rounded">.env</code> file to skip this step.
+            </p>
+          </div>
+        )}
         
         <p className="mt-4 text-xs text-gray-400">
+          <a href="https://ai.google.dev/gemini-api/docs/billing" target="_blank" rel="noreferrer" className="underline hover:text-indigo-500">
+            Get API Key
+          </a>
+          {' | '}
           <a href="https://ai.google.dev/gemini-api/docs/billing" target="_blank" rel="noreferrer" className="underline hover:text-indigo-500">
             Billing Documentation
           </a>

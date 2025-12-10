@@ -1,3 +1,13 @@
+// AI Studio global interface (only available in AI Studio environment)
+declare global {
+  interface Window {
+    aistudio?: {
+      hasSelectedApiKey: () => Promise<boolean>;
+      openSelectKey: () => Promise<void>;
+    };
+  }
+}
+
 export enum AppStep {
   API_KEY_CHECK = 'API_KEY_CHECK',
   INPUT = 'INPUT',
