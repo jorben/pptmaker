@@ -34,7 +34,8 @@ async function callOpenAIChatAPI(
   model: string,
   messages: OpenAIMessage[],
   responseFormat?: { type: string },
-  timeoutMs: number = 180000
+  timeoutMs: number = 180000,
+  onChunk?: (text: string) => void
 ): Promise<OpenAIResponse> {
   const url = `${config.apiBase}/chat/completions`;
 
@@ -45,6 +46,7 @@ async function callOpenAIChatAPI(
     const requestBody: Record<string, unknown> = {
       model,
       messages,
+      stream: !!onChunk,
     };
 
     if (responseFormat) {
@@ -59,6 +61,7 @@ async function callOpenAIChatAPI(
       },
       body: JSON.stringify(requestBody),
       signal: controller.signal,
+      referrerPolicy: "no-referrer",
     });
 
     if (!response.ok) {
@@ -67,6 +70,41 @@ async function callOpenAIChatAPI(
         (errorData as { error?: { message?: string } })?.error?.message ||
         response.statusText;
       throw new Error(`API error: ${errorMessage}`);
+    }
+
+    if (onChunk && response.body) {
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let fullText = "";
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          if (line.startsWith("data: ") && line !== "data: [DONE]") {
+            try {
+              const data = JSON.parse(line.slice(6));
+              const content = data.choices?.[0]?.delta?.content || "";
+              if (content) {
+                onChunk(content);
+                fullText += content;
+              }
+            } catch {
+              // Ignore parse errors for partial chunks
+            }
+          }
+        }
+      }
+      
+      return {
+        choices: [{ message: { content: fullText } }]
+      };
     }
 
     return response.json();
@@ -109,6 +147,7 @@ async function callOpenAIImageAPI(
         response_format: "b64_json",
       }),
       signal: controller.signal,
+      referrerPolicy: "no-referrer",
     });
 
     if (!response.ok) {
@@ -147,7 +186,8 @@ function extractText(response: OpenAIResponse): string {
 export async function planPresentationOpenAI(
   config: VertexApiConfig,
   document: string,
-  presentationConfig: PresentationConfig
+  presentationConfig: PresentationConfig,
+  onChunk?: (text: string) => void
 ): Promise<{ title: string; slides: SlideContent[] }> {
   const systemPrompt = buildPlanningSystemPrompt(presentationConfig) + getPlanningOutputFormatHint();
 
@@ -160,7 +200,9 @@ export async function planPresentationOpenAI(
     config,
     config.contentModelId,
     messages,
-    { type: "json_object" }
+    { type: "json_object" },
+    180000,
+    onChunk
   );
   const text = extractText(response);
   return JSON.parse(text);

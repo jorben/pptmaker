@@ -11,11 +11,12 @@ interface Props {
   step: AppStep;
   presentation: Presentation | null;
   generationProgress: number;
+  streamingContent?: string;
   t: typeof translations['en'];
   uiLanguage: Language;
 }
 
-export const LoadingStep: React.FC<Props> = ({ step, presentation, generationProgress, t, uiLanguage }) => {
+export const LoadingStep: React.FC<Props> = ({ step, presentation, generationProgress, streamingContent, t, uiLanguage }) => {
   const progressListRef = useRef<HTMLDivElement>(null);
 
   // Phase 1: Planning
@@ -37,6 +38,19 @@ export const LoadingStep: React.FC<Props> = ({ step, presentation, generationPro
           </span>
         </p>
         <ProgressBar progress={generationProgress} />
+        
+        {/* Streaming Content Window */}
+        <div className="mt-8 w-full max-w-lg mx-auto px-4">
+           <p 
+             className="text-xs text-slate-400 text-center font-mono whitespace-nowrap overflow-hidden"
+             style={{ 
+               maskImage: 'linear-gradient(to right, transparent, black 15%, black 85%, transparent)',
+               WebkitMaskImage: 'linear-gradient(to right, transparent, black 15%, black 85%, transparent)' 
+             }}
+           >
+             {streamingContent ? streamingContent.slice(-120) : "..."}
+           </p>
+        </div>
       </div>
     );
   }

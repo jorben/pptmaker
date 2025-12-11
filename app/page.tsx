@@ -37,6 +37,7 @@ export default function HomePage() {
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
   const [, setIsGenerating] = useState(false);
   const [generationProgress, setGenerationProgress] = useState(0);
+  const [streamingContent, setStreamingContent] = useState("");
 
   const t = translations[uiLanguage];
 
@@ -98,6 +99,7 @@ export default function HomePage() {
             setPresentation={setPresentation}
             setIsGenerating={setIsGenerating}
             setGenerationProgress={setGenerationProgress}
+            setStreamingContent={setStreamingContent}
             t={t}
             uiLanguage={uiLanguage}
           />
@@ -119,6 +121,7 @@ export default function HomePage() {
             step={step}
             presentation={presentation}
             generationProgress={generationProgress}
+            streamingContent={streamingContent}
             t={t}
             uiLanguage={uiLanguage}
           />

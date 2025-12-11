@@ -15,6 +15,7 @@ interface Props {
   setPresentation: (presentation: Presentation | null) => void;
   setIsGenerating: (isGenerating: boolean) => void;
   setGenerationProgress: (progress: number) => void;
+  setStreamingContent?: React.Dispatch<React.SetStateAction<string>>;
   t: typeof translations['en'];
   uiLanguage: Language;
 }
@@ -27,6 +28,7 @@ export const ConfigStep: React.FC<Props> = ({
   setPresentation,
   setIsGenerating,
   setGenerationProgress,
+  setStreamingContent,
   t,
   uiLanguage 
 }) => {
@@ -37,11 +39,24 @@ export const ConfigStep: React.FC<Props> = ({
     setStep(AppStep.PLANNING);
     setIsGenerating(true);
     setGenerationProgress(10);
+    if (setStreamingContent) setStreamingContent("");
 
     try {
       // 直接调用前端 API
       const document = inputSource.textContent || inputSource.fileData || '';
-      const plan = await planPresentation(document, config);
+      const plan = await planPresentation(document, config, (chunk) => {
+        if (setStreamingContent) {
+          // 由于 Vertex AI 返回的 JSON 结构比较大，我们直接把收到的 chunk 追加进去可能意义不大
+          // 但是如果是 streamGenerateContent，每次返回可能是局部文本
+          // 对于 Vertex AI，我们之前实现的 onChunk 是传递 text content
+          // 我们在这里做个简单的处理，只显示最后 100 个字符，或者显示累积的内容
+          // 为了避免 UI 过于拥挤，我们只显示最后一段
+          setStreamingContent(prev => {
+             // 简单的追加，UI 层负责截断或滚动
+             return prev + chunk;
+          });
+        }
+      });
       
       setGenerationProgress(30);
 

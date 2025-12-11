@@ -32,9 +32,13 @@ async function callVertexAPI(
   config: VertexApiConfig,
   model: string,
   requestBody: Record<string, unknown>,
-  timeoutMs: number = 180000
+  timeoutMs: number = 180000,
+  onChunk?: (text: string) => void
 ): Promise<GeminiResponse> {
-  const url = `${config.apiBase}/models/${model}:generateContent`;
+  let url = `${config.apiBase}/models/${model}:generateContent`;
+  if (onChunk) {
+    url = `${config.apiBase}/models/${model}:streamGenerateContent?alt=sse`;
+  }
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
@@ -48,6 +52,7 @@ async function callVertexAPI(
       },
       body: JSON.stringify(requestBody),
       signal: controller.signal,
+      referrerPolicy: "no-referrer",
     });
 
     if (!response.ok) {
@@ -56,6 +61,51 @@ async function callVertexAPI(
         (errorData as { error?: { message?: string } })?.error?.message ||
         response.statusText;
       throw new Error(`API error: ${errorMessage}`);
+    }
+
+    if (onChunk && response.body) {
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let fullText = "";
+      let buffer = "";
+      
+      // Accumulate full response structure to return compatible GeminiResponse
+      const accumulatedResponse: GeminiResponse = {
+        candidates: [{
+          content: {
+            parts: [{ text: "" }]
+          }
+        }]
+      };
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          if (line.startsWith("data: ")) {
+            try {
+              const data = JSON.parse(line.slice(6));
+              const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+              if (text) {
+                onChunk(text);
+                fullText += text;
+              }
+            } catch {
+              // Ignore
+            }
+          }
+        }
+      }
+
+      if (accumulatedResponse.candidates?.[0]?.content?.parts?.[0]) {
+        accumulatedResponse.candidates[0].content.parts[0].text = fullText;
+      }
+      return accumulatedResponse;
     }
 
     return response.json();
@@ -98,7 +148,8 @@ function extractImage(response: GeminiResponse): string | null {
  */
 export async function planPresentation(
   document: string,
-  presentationConfig: PresentationConfig
+  presentationConfig: PresentationConfig,
+  onChunk?: (text: string) => void
 ): Promise<{ title: string; slides: SlideContent[] }> {
   const apiConfig = getApiConfig();
   if (!apiConfig) {
@@ -107,7 +158,7 @@ export async function planPresentation(
 
   // 根据协议类型选择调用方式
   if (apiConfig.protocol === ApiProtocol.OPENAI) {
-    return planPresentationOpenAI(apiConfig, document, presentationConfig);
+    return planPresentationOpenAI(apiConfig, document, presentationConfig, onChunk);
   }
 
   const systemInstruction = buildPlanningSystemPrompt(presentationConfig);
@@ -131,7 +182,9 @@ export async function planPresentation(
   const response = await callVertexAPI(
     apiConfig,
     apiConfig.contentModelId,
-    requestBody
+    requestBody,
+    180000,
+    onChunk
   );
   const text = extractText(response);
   return JSON.parse(text);
