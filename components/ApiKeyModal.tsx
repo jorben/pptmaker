@@ -2,12 +2,16 @@
 
 import React, { useEffect, useState } from 'react';
 import { Key, Loader2, AlertCircle, ExternalLink } from 'lucide-react';
+import { translations } from '@/lib/translations';
+
+type Translation = typeof translations.en;
 
 interface Props {
   onKeyConfigured: () => void;
+  t: Translation;
 }
 
-export const ApiKeyModal: React.FC<Props> = ({ onKeyConfigured }) => {
+export const ApiKeyModal: React.FC<Props> = ({ onKeyConfigured, t }) => {
   const [checking, setChecking] = useState(true);
   const [hasKey, setHasKey] = useState(false);
   const [apiKey, setApiKey] = useState('');
@@ -37,7 +41,7 @@ export const ApiKeyModal: React.FC<Props> = ({ onKeyConfigured }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!apiKey.trim()) {
-      setError('Please enter an API key');
+      setError(t.errorEmpty);
       return;
     }
 
@@ -58,10 +62,10 @@ export const ApiKeyModal: React.FC<Props> = ({ onKeyConfigured }) => {
         localStorage.setItem('gemini_api_key_temp', apiKey.trim());
         onKeyConfigured();
       } else {
-        setError(data.error || 'Invalid API key');
+        setError(data.error || t.errorFailed);
       }
     } catch {
-      setError('Failed to validate API key');
+      setError(t.errorFailed);
     } finally {
       setSubmitting(false);
     }
@@ -72,7 +76,7 @@ export const ApiKeyModal: React.FC<Props> = ({ onKeyConfigured }) => {
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
         <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl text-center">
           <Loader2 className="w-8 h-8 text-indigo-600 animate-spin mx-auto mb-4" />
-          <p className="text-gray-600">Checking API configuration...</p>
+          <p className="text-gray-600">{t.checkingApi}</p>
         </div>
       </div>
     );
@@ -89,16 +93,16 @@ export const ApiKeyModal: React.FC<Props> = ({ onKeyConfigured }) => {
           <div className="mx-auto bg-indigo-100 w-16 h-16 rounded-full flex items-center justify-center mb-4">
             <Key className="w-8 h-8 text-indigo-600" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Configure API Key</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">{t.configureApiKey}</h2>
           <p className="text-gray-600 text-sm">
-            Enter your Gemini API key to start generating presentations.
+            {t.enterApiKey}
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Gemini API Key
+              {t.geminiApiKeyLabel}
             </label>
             <input
               type="password"
@@ -125,17 +129,17 @@ export const ApiKeyModal: React.FC<Props> = ({ onKeyConfigured }) => {
             {submitting ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                Validating...
+                {t.validating}
               </>
             ) : (
-              'Continue'
+              t.continue
             )}
           </button>
         </form>
 
         <div className="mt-6 pt-4 border-t border-gray-100">
           <p className="text-xs text-gray-500 text-center mb-2">
-            For persistent configuration, add to <code className="bg-gray-100 px-1 rounded">.env.local</code>:
+            {t.persistentConfig} <code className="bg-gray-100 px-1 rounded">.env.local</code>:
           </p>
           <code className="block text-xs bg-gray-50 p-2 rounded text-gray-600 text-center">
             GEMINI_API_KEY=your_key_here
@@ -146,7 +150,7 @@ export const ApiKeyModal: React.FC<Props> = ({ onKeyConfigured }) => {
             rel="noopener noreferrer"
             className="mt-3 text-xs text-indigo-600 hover:text-indigo-700 flex items-center justify-center gap-1"
           >
-            Get an API key from Google AI Studio
+            {t.getApiKey}
             <ExternalLink className="w-3 h-3" />
           </a>
         </div>

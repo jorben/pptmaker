@@ -51,7 +51,7 @@ export default function HomePage() {
   return (
     <div className="h-screen flex flex-col">
       {step === AppStep.API_KEY_CHECK && (
-        <ApiKeyModal onKeyConfigured={handleKeyConfigured} />
+        <ApiKeyModal onKeyConfigured={handleKeyConfigured} t={t} />
       )}
 
       {step !== AppStep.EDITOR && step !== AppStep.API_KEY_CHECK && (
