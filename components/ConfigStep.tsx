@@ -5,7 +5,7 @@ import { ChevronLeft, Wand2 } from 'lucide-react';
 import type { PresentationConfig, InputSource, Presentation, SlideContent, Slide } from '@/lib/types';
 import { SlideStyle, AppStep } from '@/lib/types';
 import type { Language, translations } from '@/lib/translations';
-import { planPresentation } from '@/lib/vertex-api';
+import { planPresentation } from '@/lib/api';
 
 interface Props {
   config: PresentationConfig;

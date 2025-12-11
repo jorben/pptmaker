@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { Key, Loader2, AlertCircle, Languages, X } from 'lucide-react';
 import { translations, Language } from '@/lib/translations';
-import { getApiConfig, saveApiConfig, isApiConfigured, VertexApiConfig, ApiProtocol } from '@/lib/api';
+import { getApiConfig, saveApiConfig, isApiConfigured, ApiConfig, ApiProtocol } from '@/lib/config';
 
 type Translation = typeof translations.en;
 
@@ -25,7 +25,7 @@ export const ApiKeyModal: React.FC<Props> = ({
   forceEdit = false 
 }) => {
   const [checking, setChecking] = useState(true);
-  const [config, setConfig] = useState<VertexApiConfig>({
+  const [config, setConfig] = useState<ApiConfig>({
     protocol: ApiProtocol.VERTEX_AI,
     apiKey: '',
     apiBase: '',

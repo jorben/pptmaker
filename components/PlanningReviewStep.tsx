@@ -3,7 +3,7 @@
 import React from 'react';
 import { ChevronLeft, Play, Plus, Trash2 } from 'lucide-react';
 import { Presentation, AppStep, Slide, SlideContent, PresentationConfig } from '@/lib/types';
-import { generateSlideImage } from '@/lib/vertex-api';
+import { generateSlideImage } from '@/lib/api';
 import type { translations } from '@/lib/translations';
 
 interface Props {

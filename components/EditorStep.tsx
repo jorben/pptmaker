@@ -16,7 +16,7 @@ import {
   type Presentation,
   type PresentationConfig,
 } from "@/lib/types";
-import { generateSlideImage } from "@/lib/vertex-api";
+import { generateSlideImage } from "@/lib/api";
 import type { translations } from "@/lib/translations";
 
 interface Props {
