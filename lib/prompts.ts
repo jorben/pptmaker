@@ -48,11 +48,17 @@ export function buildPlanningSystemPrompt(config: PresentationConfig): string {
   const stylePrompt = getStylePrompt(config);
   const additionalContext = getAdditionalContext(config);
 
+  const pageCountInstruction =
+    config.pageCount === "auto"
+      ? "Determine the optimal number of slides based on the content's complexity and structure. Use your judgment to create an appropriate number of slides that best presents the material."
+      : `Split it into a ${config.pageCount}-page presentation.`;
+
   return `You are an expert presentation designer. 
-Analyze the provided input (text or document) and split it into a ${config.pageCount}-page presentation.
-Output Language: ${config.language}.
+Analyze the provided input (text or document) and ${pageCountInstruction}
+Presentation contents language: ${config.language}.
 ${stylePrompt}
 ${additionalContext}
+Maintain consistent styles (including color schemes, themes, and roles) across multiple pages.
 
 Return a JSON object with a 'title' for the whole deck and an array of 'slides'.
 For each slide, provide:
@@ -65,7 +71,7 @@ For each slide, provide:
  * 构建规划演示文稿的用户输入
  */
 export function buildPlanningUserPrompt(document: string): string {
-  return `Input Text:\n${document.substring(0, 30000)}`;
+  return `Input Text:\n${document.substring(0, 128000)}`;
 }
 
 /**
@@ -120,13 +126,17 @@ export function buildImageGenerationPrompt(
   config: PresentationConfig
 ): string {
   const styleContext = getStyleContext(config);
-  const additionalContext = getAdditionalContext(config, "Additional Style Requirements");
+  const additionalContext = getAdditionalContext(
+    config,
+    "Additional Style Requirements"
+  );
 
   return `Design a professional presentation slide.
 
 Context:
 Presentation Title: ${deckTitle}
 Slide Title: ${slide.title}
+Slide Bullet Points: ${slide.bulletPoints.join(", ")}
 Style Guide: ${styleContext}
 ${additionalContext}
 

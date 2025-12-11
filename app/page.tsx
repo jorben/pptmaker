@@ -18,7 +18,7 @@ import { LoadingStep } from "@/components/LoadingStep";
 import { EditorStep } from "@/components/EditorStep";
 
 const INITIAL_CONFIG: PresentationConfig = {
-  pageCount: 6,
+  pageCount: "auto",
   language: "English",
   style: SlideStyle.MINIMAL,
   contentModel: "gemini-2.5-flash",

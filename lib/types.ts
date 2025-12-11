@@ -36,7 +36,7 @@ export interface InputSource {
 }
 
 export interface PresentationConfig {
-  pageCount: number;
+  pageCount: number | 'auto';
   language: 'Chinese' | 'English';
   style: SlideStyle;
   customStyleDescription?: string;

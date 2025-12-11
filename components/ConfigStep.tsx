@@ -146,14 +146,16 @@ export const ConfigStep: React.FC<Props> = ({
         <div className="col-span-2 grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
             <label className="block text-sm font-medium text-foreground mb-2">{t.approxSlides}</label>
-            <input 
-              type="number" 
-              min={1} 
-              max={40}
+            <select
               value={config.pageCount}
-              onChange={(e) => setConfig({...config, pageCount: parseInt(e.target.value) || 5})}
-              className="w-full p-3 border border-input rounded-lg"
-            />
+              onChange={(e) => setConfig({...config, pageCount: e.target.value === 'auto' ? 'auto' : parseInt(e.target.value)})}
+              className="w-full p-3 border border-input rounded-lg bg-background"
+            >
+              <option value="auto">{t.autoSlides}</option>
+              {[5, 8, 10, 12, 15, 20, 25, 30].map((num) => (
+                <option key={num} value={num}>{num}</option>
+              ))}
+            </select>
           </div>
 
           <div>

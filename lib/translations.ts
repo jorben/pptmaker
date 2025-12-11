@@ -26,6 +26,7 @@ export const translations = {
     additionalReqPlaceholder:
       "e.g. Use a dark theme, strictly follow the document structure, include a summary slide...",
     approxSlides: "Approximate Slides",
+    autoSlides: "Auto",
     outputLang: "Output Language",
     generateBtn: "Generate Presentation",
     loadingPlanning: "Analyzing content and structuring narrative...",
@@ -98,6 +99,7 @@ export const translations = {
     additionalReqPlaceholder:
       "例如：使用深色主题，严格遵循文档结构，包含总结页...",
     approxSlides: "预估页数",
+    autoSlides: "智能判断",
     outputLang: "输出语言",
     generateBtn: "生成演示文稿",
     loadingPlanning: "正在分析内容并构建叙事结构...",
