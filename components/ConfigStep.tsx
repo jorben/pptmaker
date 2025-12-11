@@ -152,7 +152,7 @@ export const ConfigStep: React.FC<Props> = ({
               className="w-full p-3 border border-input rounded-lg bg-background"
             >
               <option value="auto">{t.autoSlides}</option>
-              {[5, 8, 10, 12, 15, 20, 25, 30].map((num) => (
+              {Array.from({length: 30}, (_, i) => i + 1).map((num) => (
                 <option key={num} value={num}>{num}</option>
               ))}
             </select>
