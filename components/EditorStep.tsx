@@ -97,7 +97,13 @@ export const EditorStep: React.FC<Props> = ({
   };
 
   const downloadPDF = () => {
+    const originalTitle = document.title;
+    document.title = presentation.title || 'Presentation';
     window.print();
+    // Restore original title after print dialog
+    setTimeout(() => {
+      document.title = originalTitle;
+    }, 100);
   };
 
   return (
