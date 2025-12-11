@@ -37,7 +37,7 @@ async function callVertexAPI(
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-goog-api-key": config.apiKey,
+        "X-Goog-Api-Key": config.apiKey,
       },
       body: JSON.stringify(requestBody),
       signal: controller.signal,
