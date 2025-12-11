@@ -2,6 +2,7 @@
 
 import { getApiConfig, VertexApiConfig, ApiProtocol } from "./api";
 import { PresentationConfig, SlideContent } from "./types";
+import { cleanJsonString } from "./utils";
 import { planPresentationOpenAI, generateSlideImageOpenAI } from "./openai-api";
 import {
   buildPlanningSystemPrompt,
@@ -187,7 +188,8 @@ export async function planPresentation(
     onChunk
   );
   const text = extractText(response);
-  return JSON.parse(text);
+  const cleanedText = cleanJsonString(text);
+  return JSON.parse(cleanedText);
 }
 
 /**

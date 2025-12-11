@@ -2,6 +2,7 @@
 
 import { VertexApiConfig } from "./api";
 import { PresentationConfig, SlideContent } from "./types";
+import { cleanJsonString } from "./utils";
 import {
   buildPlanningSystemPrompt,
   buildPlanningUserPrompt,
@@ -14,15 +15,18 @@ interface OpenAIMessage {
   content: string | Array<{ type: string; text?: string; image_url?: { url: string } }>;
 }
 
+interface OpenAIImageInfo {
+  image_url: {
+    url: string;
+  };
+}
+
 interface OpenAIResponse {
   choices?: Array<{
     message?: {
       content?: string;
+      images?: OpenAIImageInfo[];
     };
-  }>;
-  data?: Array<{
-    b64_json?: string;
-    url?: string;
   }>;
 }
 
@@ -119,7 +123,7 @@ async function callOpenAIChatAPI(
 }
 
 /**
- * 调用 OpenAI Compatible API (Images)
+ * 调用 OpenAI Compatible API (Chat Completions) - 用于图片生成
  */
 async function callOpenAIImageAPI(
   config: VertexApiConfig,
@@ -127,7 +131,7 @@ async function callOpenAIImageAPI(
   prompt: string,
   timeoutMs: number = 180000
 ): Promise<OpenAIResponse> {
-  const url = `${config.apiBase}/images/generations`;
+  const url = `${config.apiBase}/chat/completions`;
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
@@ -141,10 +145,13 @@ async function callOpenAIImageAPI(
       },
       body: JSON.stringify({
         model,
-        prompt,
-        n: 1,
-        size: "1792x1024",
-        response_format: "b64_json",
+        messages: [
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
+        modalities: ["image", "text"],
       }),
       signal: controller.signal,
       referrerPolicy: "no-referrer",
@@ -205,7 +212,8 @@ export async function planPresentationOpenAI(
     onChunk
   );
   const text = extractText(response);
-  return JSON.parse(text);
+  const cleanedText = cleanJsonString(text);
+  return JSON.parse(cleanedText);
 }
 
 /**
@@ -225,10 +233,10 @@ export async function generateSlideImageOpenAI(
     fullPrompt
   );
 
-  const imageData = response.data?.[0]?.b64_json;
-  if (!imageData) {
+  const images = response.choices?.[0]?.message?.images;
+  if (!images || images.length === 0) {
     throw new Error("No image generated");
   }
 
-  return `data:image/png;base64,${imageData}`;
+  return images[0].image_url.url;
 }
