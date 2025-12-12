@@ -134,7 +134,6 @@ export function buildImageGenerationPrompt(
   return `Design a professional presentation slide.
 
 Context:
-Presentation Title: ${deckTitle}
 Slide Title: ${slide.title}
 Slide Bullet Points: ${slide.bulletPoints.join(", ")}
 Style Guide: ${styleContext}
@@ -149,5 +148,5 @@ IMPORTANT TEXT RENDERING RULES:
 DESIGN REQUIREMENTS:
 - Create a high-quality slide design.
 - Aspect Ratio 16:9.
-- Ensure the layout has clear space for text overlay later.`;
+- Design vivid graphics, matching scenes, appropriate structure to complement simplified text.`;
 }
