@@ -22,7 +22,7 @@ export const translations = {
       custom: { title: "Custom", desc: "Describe your own unique style." },
     },
     customPlaceholder: "e.g. Cyberpunk neon, or Soft pastel watercolors...",
-    additionalReqLabel: "Additional Requirements",
+    additionalReqLabel: "Visual Style",
     additionalReqPlaceholder:
       "e.g. Use a dark theme, strictly follow the document structure, include a summary slide...",
     approxSlides: "Approximate Slides",
@@ -104,7 +104,7 @@ export const translations = {
       custom: { title: "自定义", desc: "描述您独特的风格需求。" },
     },
     customPlaceholder: "例如：赛博朋克霓虹风，或婴儿派对的柔和水彩风...",
-    additionalReqLabel: "补充需求",
+    additionalReqLabel: "视觉风格",
     additionalReqPlaceholder:
       "例如：使用深色主题，严格遵循文档结构，包含总结页...",
     approxSlides: "预估页数",
