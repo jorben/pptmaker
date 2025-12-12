@@ -68,9 +68,11 @@ export default function HomePage() {
 
   const handleHistorySelect = (
     selectedPresentation: Presentation,
+    selectedConfig: PresentationConfig,
     historyId: string
   ) => {
     setPresentation(selectedPresentation);
+    setConfig(selectedConfig);
     setCurrentHistoryId(historyId);
     setActiveSlideIndex(0);
     setStep(AppStep.EDITOR);
@@ -80,26 +82,26 @@ export default function HomePage() {
   // Save to history when entering editor step from generation (not from history restore)
   useEffect(() => {
     if (step === AppStep.EDITOR && presentation && !currentHistoryId) {
-      savePresentationToHistory(presentation)
+      savePresentationToHistory(presentation, config)
         .then((id) => {
           setCurrentHistoryId(id);
         })
         .catch((err) => console.error("Failed to save history:", err));
     }
-  }, [step, presentation, currentHistoryId]);
+  }, [step, presentation, currentHistoryId, config]);
 
   // Update history when presentation changes in editor
   useEffect(() => {
     if (step === AppStep.EDITOR && presentation && currentHistoryId) {
       const timeoutId = setTimeout(() => {
-        savePresentationToHistory(presentation, currentHistoryId).catch((err) =>
-          console.error("Failed to update history:", err)
+        savePresentationToHistory(presentation, config, currentHistoryId).catch(
+          (err) => console.error("Failed to update history:", err)
         );
       }, 1000); // Debounce updates
 
       return () => clearTimeout(timeoutId);
     }
-  }, [presentation, currentHistoryId, step]);
+  }, [presentation, config, currentHistoryId, step]);
 
   // Reset history ID when starting new presentation
   useEffect(() => {
@@ -198,6 +200,8 @@ export default function HomePage() {
             config={config}
             setIsGenerating={setIsGenerating}
             setGenerationProgress={setGenerationProgress}
+            currentHistoryId={currentHistoryId}
+            setCurrentHistoryId={setCurrentHistoryId}
             t={t}
             uiLanguage={uiLanguage}
           />

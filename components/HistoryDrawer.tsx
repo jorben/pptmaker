@@ -2,14 +2,18 @@ import React, { useEffect, useState } from "react";
 import { X, Trash2, Clock, Image as ImageIcon } from "lucide-react";
 import { translations } from "@/lib/translations";
 import { getHistory, deleteHistoryRecord, HistoryRecord } from "@/lib/db";
-import { Presentation } from "@/lib/types";
+import { Presentation, PresentationConfig } from "@/lib/types";
 
 type Translation = typeof translations.en;
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  onSelect: (presentation: Presentation, historyId: string) => void;
+  onSelect: (
+    presentation: Presentation,
+    config: PresentationConfig,
+    historyId: string
+  ) => void;
   t: Translation;
 }
 
@@ -99,7 +103,9 @@ export const HistoryDrawer: React.FC<Props> = ({
             history.map((record) => (
               <div
                 key={record.id}
-                onClick={() => onSelect(record.presentation, record.id)}
+                onClick={() =>
+                  onSelect(record.presentation, record.config, record.id)
+                }
                 className="group relative bg-muted/50 hover:bg-muted border border-transparent hover:border-primary/20 rounded-lg p-3 cursor-pointer transition-all"
               >
                 <div className="aspect-video bg-card rounded overflow-hidden mb-3 relative border border-border">

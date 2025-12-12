@@ -1,4 +1,4 @@
-import { Presentation } from "./types";
+import { Presentation, PresentationConfig } from "./types";
 
 const DB_NAME = "ppt-maker-db";
 const DB_VERSION = 1;
@@ -8,6 +8,7 @@ export interface HistoryRecord {
   id: string;
   timestamp: number;
   presentation: Presentation;
+  config: PresentationConfig;
   thumbnail?: string; // First slide image
 }
 
@@ -35,6 +36,7 @@ export const initDB = (): Promise<IDBDatabase> => {
 
 export const savePresentationToHistory = async (
   presentation: Presentation,
+  config: PresentationConfig,
   existingId?: string
 ): Promise<string> => {
   try {
@@ -47,6 +49,7 @@ export const savePresentationToHistory = async (
       id: recordId,
       timestamp: Date.now(),
       presentation,
+      config,
       thumbnail: presentation.slides[0]?.imageUrl,
     };
 
@@ -63,7 +66,8 @@ export const savePresentationToHistory = async (
 
 export const updatePresentationInHistory = async (
   id: string,
-  presentation: Presentation
+  presentation: Presentation,
+  config: PresentationConfig
 ): Promise<void> => {
   try {
     const db = await initDB();
@@ -74,6 +78,7 @@ export const updatePresentationInHistory = async (
       id,
       timestamp: Date.now(),
       presentation,
+      config,
       thumbnail: presentation.slides[0]?.imageUrl,
     };
 

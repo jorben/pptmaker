@@ -7,6 +7,7 @@ import {
   getApiConfig,
   saveApiConfig,
   isApiConfigured,
+  getProtocolConfig,
   ApiConfig,
   ApiProtocol,
   RequestMode,
@@ -42,6 +43,7 @@ export const ApiKeyModal: React.FC<Props> = ({
   });
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
     // 检查 localStorage 中是否有配置
@@ -59,11 +61,36 @@ export const ApiKeyModal: React.FC<Props> = ({
         onKeyConfigured();
       }
       setChecking(false);
+      setIsInitialized(true);
     };
 
     checkConfig();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [forceEdit]);
+
+  // 当协议切换时，自动加载该协议的配置（仅在初始化完成后）
+  useEffect(() => {
+    if (!isInitialized) return;
+
+    const protocolConfig = getProtocolConfig(config.protocol);
+    if (protocolConfig) {
+      setConfig({
+        protocol: config.protocol,
+        ...protocolConfig,
+      });
+    } else {
+      // 如果该协议没有保存的配置，使用默认值
+      setConfig({
+        protocol: config.protocol,
+        requestMode: RequestMode.CLIENT_DIRECT,
+        apiKey: "",
+        apiBase: "",
+        contentModelId: "",
+        imageModelId: "",
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [config.protocol, isInitialized]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -276,7 +303,10 @@ export const ApiKeyModal: React.FC<Props> = ({
               <button
                 type="button"
                 onClick={() =>
-                  setConfig({ ...config, requestMode: RequestMode.CLIENT_DIRECT })
+                  setConfig({
+                    ...config,
+                    requestMode: RequestMode.CLIENT_DIRECT,
+                  })
                 }
                 className={`flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-all ${
                   config.requestMode === RequestMode.CLIENT_DIRECT
@@ -287,12 +317,17 @@ export const ApiKeyModal: React.FC<Props> = ({
                 <span className="text-sm font-medium">
                   {t.requestModeClientDirect}
                 </span>
-                <span className="text-[10px] opacity-80 mt-1">Browser Fetch</span>
+                <span className="text-[10px] opacity-80 mt-1">
+                  Browser Fetch
+                </span>
               </button>
               <button
                 type="button"
                 onClick={() =>
-                  setConfig({ ...config, requestMode: RequestMode.SERVER_PROXY })
+                  setConfig({
+                    ...config,
+                    requestMode: RequestMode.SERVER_PROXY,
+                  })
                 }
                 className={`flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-all ${
                   config.requestMode === RequestMode.SERVER_PROXY
