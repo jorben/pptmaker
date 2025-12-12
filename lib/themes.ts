@@ -89,4 +89,13 @@ export const THEMES: Theme[] = [
       "Exploded view of a digital interface, layered glass plates stacked vertically, 3D infographic layout, liquid glass elements morphing between layers, holographic projection style, visual representation of deep tech analysis, frosted transparency with blurred background, refraction of light, futuristic blue and teal color palette, ultra-detailed",
     thumbnail: "/theme/liquid_glass.png",
   },
+  {
+    name: {
+      en: "Flat Illustration Style",
+      zh: "扁平插画",
+    },
+    prompt:
+      "Flat hand-drawn illustration style, simple doodle line art with uneven ink outlines, minimalist character design without facial features. The color palette features mint green, soft teal, light pink, and white on a light grey background. Misaligned color fills, abstract geometric shapes, clean and modern corporate aesthetic, vector art style, infographic style, white space, friendly and approachable atmosphere. ",
+    thumbnail: "/theme/flat_illustration.png",
+  },
 ];

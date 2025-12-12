@@ -12,7 +12,7 @@ export function getStylePrompt(config: PresentationConfig): string {
   return `Style: ${
     config.style === SlideStyle.MINIMAL
       ? "Minimalist, high impact, few words"
-      : "Detailed, educational, comprehensive"
+      : "Content detailed, educational, comprehensive information"
   }`;
 }
 
