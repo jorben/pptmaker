@@ -49,7 +49,6 @@ export const EditorStep: React.FC<Props> = ({
       return;
     }
 
-    // eslint-disable-next-line no-restricted-globals
     if (confirm("Are you sure you want to delete this slide?")) {
       const newSlides = [...presentation.slides];
       newSlides.splice(index, 1);

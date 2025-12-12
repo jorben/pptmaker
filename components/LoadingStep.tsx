@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef } from 'react';
+import React from 'react';
 import { Wand2, Clock, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 import type { Presentation } from '@/lib/types';
 import { AppStep } from '@/lib/types';
@@ -17,7 +17,6 @@ interface Props {
 }
 
 export const LoadingStep: React.FC<Props> = ({ step, presentation, generationProgress, streamingContent, t, uiLanguage }) => {
-  const progressListRef = useRef<HTMLDivElement>(null);
 
   // Phase 1: Planning
   if (step === AppStep.PLANNING) {
