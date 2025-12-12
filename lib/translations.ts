@@ -12,7 +12,7 @@ export const translations = {
     nextBtn: "Next: Customize Style",
     backBtn: "Back to Input",
     settingsTitle: "Presentation Settings",
-    visualStyle: "Visual Style",
+    visualStyle: "Content Style",
     styles: {
       minimal: { title: "Minimalist", desc: "Clean, high impact, less text." },
       detailed: {
@@ -97,7 +97,7 @@ export const translations = {
     nextBtn: "下一步：风格设置",
     backBtn: "返回输入",
     settingsTitle: "演示设置",
-    visualStyle: "视觉风格",
+    visualStyle: "内容风格",
     styles: {
       minimal: { title: "极简风格", desc: "干净、高冲击力、文字较少。" },
       detailed: { title: "详细展示", desc: "教育教学、内容详实、布局全面。" },
