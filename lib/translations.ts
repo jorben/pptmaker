@@ -77,6 +77,7 @@ export const translations = {
     requestModeLabel: "Request Mode",
     requestModeClientDirect: "Client Direct",
     requestModeServerProxy: "Server Proxy",
+    presetThemeLabel: "Preset Themes",
   },
   zh: {
     appTitle: "PPTMaker AI",
@@ -150,5 +151,6 @@ export const translations = {
     requestModeLabel: "请求方式",
     requestModeClientDirect: "客户端直连",
     requestModeServerProxy: "服务端中转",
+    presetThemeLabel: "预设主题",
   },
 };

@@ -1,11 +1,13 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import { ChevronLeft, Wand2 } from 'lucide-react';
 import type { PresentationConfig, InputSource, Presentation, SlideContent, Slide } from '@/lib/types';
 import { SlideStyle, AppStep } from '@/lib/types';
 import type { Language, translations } from '@/lib/translations';
 import { planPresentation } from '@/lib/api';
+import { THEMES } from '@/lib/themes';
 
 interface Props {
   config: PresentationConfig;
@@ -172,6 +174,36 @@ export const ConfigStep: React.FC<Props> = ({
         </div>
 
         <div className="col-span-2">
+          <label className="block text-sm font-medium text-foreground mb-3">{t.presetThemeLabel}</label>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-6">
+            {THEMES.map((theme, idx) => (
+              <div
+                key={idx}
+                className="cursor-pointer group relative rounded-lg overflow-hidden border border-border hover:border-primary transition-all"
+                onClick={() => {
+                  const current = config.additionalPrompt || '';
+                  const toAdd = theme.prompt;
+                  if (!current.includes(toAdd)) {
+                    const newValue = current ? `${current}\n${toAdd}` : toAdd;
+                    setConfig({ ...config, additionalPrompt: newValue });
+                  }
+                }}
+              >
+                <div className="relative aspect-video w-full">
+                  <Image
+                    src={theme.thumbnail}
+                    alt={theme.name[uiLanguage]}
+                    fill
+                    className="object-cover transition-transform group-hover:scale-105"
+                  />
+                </div>
+                <div className="p-2 bg-card text-xs font-medium text-center truncate" title={theme.name[uiLanguage]}>
+                  {theme.name[uiLanguage]}
+                </div>
+              </div>
+            ))}
+          </div>
+
           <label className="block text-sm font-medium text-foreground mb-2">{t.additionalReqLabel}</label>
           <textarea
             placeholder={t.additionalReqPlaceholder}
