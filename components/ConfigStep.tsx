@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import { ChevronLeft, Wand2 } from 'lucide-react';
 import type { PresentationConfig, InputSource, Presentation, SlideContent, Slide } from '@/lib/types';
@@ -8,6 +8,8 @@ import { SlideStyle, AppStep } from '@/lib/types';
 import type { Language, translations } from '@/lib/translations';
 import { planPresentation } from '@/lib/api';
 import { THEMES } from '@/lib/themes';
+import { isApiConfigured } from '@/lib/config';
+import { ApiKeyModal } from './ApiKeyModal';
 
 interface Props {
   config: PresentationConfig;
@@ -20,21 +22,33 @@ interface Props {
   setStreamingContent?: React.Dispatch<React.SetStateAction<string>>;
   t: typeof translations['en'];
   uiLanguage: Language;
+  onLanguageChange: (lang: Language) => void;
 }
 
-export const ConfigStep: React.FC<Props> = ({ 
-  config, 
-  setConfig, 
-  setStep, 
+export const ConfigStep: React.FC<Props> = ({
+  config,
+  setConfig,
+  setStep,
   inputSource,
   setPresentation,
   setIsGenerating,
   setGenerationProgress,
   setStreamingContent,
   t,
-  uiLanguage 
+  uiLanguage,
+  onLanguageChange
 }) => {
+  const [showApiModal, setShowApiModal] = useState(false);
+  const [pendingGeneration, setPendingGeneration] = useState(false);
+
   const startGeneration = async () => {
+    // 首先检查 API 配置
+    if (!isApiConfigured()) {
+      setPendingGeneration(true);
+      setShowApiModal(true);
+      return;
+    }
+
     if (inputSource.type === 'text' && !inputSource.textContent?.trim()) return;
     if (inputSource.type === 'file' && !inputSource.fileData) return;
 
@@ -95,7 +109,22 @@ export const ConfigStep: React.FC<Props> = ({
     }
   };
 
+  const handleApiConfigured = () => {
+    setShowApiModal(false);
+    if (pendingGeneration) {
+      setPendingGeneration(false);
+      // API 配置完成后自动继续生成流程
+      startGeneration();
+    }
+  };
+
+  const handleApiCancel = () => {
+    setShowApiModal(false);
+    setPendingGeneration(false);
+  };
+
   return (
+    <>
     <div className="max-w-4xl mx-auto w-full p-6 animate-fade-in">
       <button 
         onClick={() => setStep(AppStep.INPUT)}
@@ -218,5 +247,17 @@ export const ConfigStep: React.FC<Props> = ({
         </button>
       </div>
     </div>
+
+    {showApiModal && (
+      <ApiKeyModal
+        onKeyConfigured={handleApiConfigured}
+        onCancel={handleApiCancel}
+        t={t}
+        uiLanguage={uiLanguage}
+        onLanguageChange={onLanguageChange}
+        forceEdit={true}
+      />
+    )}
+  </>
   );
 };

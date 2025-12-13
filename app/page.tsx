@@ -28,7 +28,7 @@ const INITIAL_CONFIG: PresentationConfig = {
 };
 
 export default function HomePage() {
-  const [step, setStep] = useState<AppStep>(AppStep.API_KEY_CHECK);
+  const [step, setStep] = useState<AppStep>(AppStep.INPUT);
   const [inputSource, setInputSource] = useState<InputSource>({
     type: "text",
     textContent: "",
@@ -112,16 +112,7 @@ export default function HomePage() {
 
   return (
     <div className="h-screen flex flex-col">
-      {step === AppStep.API_KEY_CHECK && (
-        <ApiKeyModal
-          onKeyConfigured={handleKeyConfigured}
-          t={t}
-          uiLanguage={uiLanguage}
-          onLanguageChange={handleLanguageChange}
-        />
-      )}
-
-      {step !== AppStep.EDITOR && step !== AppStep.API_KEY_CHECK && (
+      {step !== AppStep.EDITOR && (
         <header className="h-16 bg-card border-b border-border flex items-center justify-between px-6">
           <div className="flex items-center gap-2">
             <div className="bg-primary p-1.5 rounded-lg">
@@ -190,6 +181,7 @@ export default function HomePage() {
             setStreamingContent={setStreamingContent}
             t={t}
             uiLanguage={uiLanguage}
+            onLanguageChange={handleLanguageChange}
           />
         )}
         {step === AppStep.PLANNING_REVIEW && presentation && (

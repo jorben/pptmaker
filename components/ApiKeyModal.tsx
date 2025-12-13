@@ -218,9 +218,19 @@ export const ApiKeyModal: React.FC<Props> = ({
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-foreground mb-1">
-              {t.apiKeyLabel}
-            </label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-sm font-medium text-foreground">
+                {t.apiKeyLabel}
+              </label>
+              <a
+                href="https://zenmux.ai/invite/9H70CU"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-primary hover:text-primary/80 transition-colors underline"
+              >
+                {t.getApiKeyLink}
+              </a>
+            </div>
             <input
               type="password"
               value={config.apiKey}

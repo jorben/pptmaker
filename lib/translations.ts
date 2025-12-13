@@ -57,6 +57,7 @@ export const translations = {
     vertexConfigRequired:
       "Configure your API to start generating presentations. Configuration is stored locally in your browser.",
     apiKeyLabel: "API Key",
+    getApiKeyLink: "Get API Key",
     apiBaseLabel: "API Base URL",
     contentModelLabel: "Content Model ID",
     imageModelLabel: "Image Model ID",
@@ -139,6 +140,7 @@ export const translations = {
     vertexConfigRequired:
       "配置您的 API 以开始生成演示文稿，配置只存储在浏览器本地。",
     apiKeyLabel: "API 密钥",
+    getApiKeyLink: "点击获取API Key",
     apiBaseLabel: "API 基础 URL",
     contentModelLabel: "内容模型 ID",
     imageModelLabel: "图片模型 ID",

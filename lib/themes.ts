@@ -28,6 +28,15 @@ export const THEMES: Theme[] = [
   },
   {
     name: {
+      en: "Judy Hopps & Nick Wilde Style",
+      zh: "Judy和Nick",
+    },
+    prompt:
+      "Judy Hopps (cute grey bunny with purple eyes, wearing blue police uniform) and Nick Wilde (red fox with green shirt and tie) from Zootopia vividly interpret plots, children's book illustration style, hand-drawn aesthetic with bold black outlines. Vibrant and flat coloring with soft watercolor texture backgrounds. Expressive anthropomorphic characters, storyboard composition vibe. Educational poster aesthetic, clear details, soft shading. High quality, 2D art, cute and friendly atmosphere.",
+    thumbnail: "/theme/judy_hopps_nick_wilde.png",
+  },
+  {
+    name: {
       en: "Cyberpunk Style",
       zh: "赛博朋克",
     },
